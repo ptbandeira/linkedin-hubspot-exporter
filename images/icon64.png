@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-    <rect width="64" height="64" fill="#673AB7"/>
-    <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="32">LH</text>
+    <defs>
+        <linearGradient id="grad64" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#21CBF3;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill="url(#grad64)" rx="10"/>
+    <g transform="translate(8, 8)">
+        <path d="M0 0h20v24H0z" fill="#fff" />
+        <line x1="2" y1="6" x2="18" y2="6" stroke="#2196F3" stroke-width="2"/>
+        <line x1="2" y1="12" x2="18" y2="12" stroke="#2196F3" stroke-width="2"/>
+    </g>
+    <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="24">LH</text>
 </svg>
