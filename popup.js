@@ -10,12 +10,24 @@ document.getElementById('exportContacts').addEventListener('click', async () => 
     try {
         // Get the current active tab
         const currentTabId = await getCurrentTabId();
-        
-        // Send message to content script to extract contacts
-        const contacts = await chrome.tabs.sendMessage(currentTabId, { action: 'extractContacts' });
 
-        // Check if contacts were extracted
-        if (!Array.isArray(contacts) || contacts.length === 0) {
+        // Retry the message until successful or until maximum retries
+        let attempts = 0;
+        const maxAttempts = 5;
+        let contacts = null;
+
+        while (attempts < maxAttempts) {
+            try {
+                contacts = await sendMessageToContentScript(currentTabId, { action: 'extractContacts' });
+                if (contacts) break; // Exit loop if successful
+            } catch (error) {
+                console.warn(`Attempt ${attempts + 1} failed. Retrying...`);
+                attempts++;
+                await new Promise(res => setTimeout(res, 500)); // Wait for half a second before retrying
+            }
+        }
+
+        if (!contacts || contacts.length === 0) {
             throw new Error('No contacts found to export. Make sure you are on the correct LinkedIn page.');
         }
 
@@ -55,6 +67,21 @@ async function getCurrentTabId() {
                 resolve(tabs[0].id);
             } else {
                 reject(new Error('No active tab found.'));
+            }
+        });
+    });
+}
+
+// Function to send a message to the content script
+async function sendMessageToContentScript(tabId, message) {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(tabId, message, (response) => {
+            if (chrome.runtime.lastError) {
+                // Log the error and reject, or retry the connection
+                console.error("Error sending message to content script:", chrome.runtime.lastError.message);
+                reject(new Error("Failed to connect to the content script."));
+            } else {
+                resolve(response);
             }
         });
     });
