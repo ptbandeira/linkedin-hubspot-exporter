@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LinkedIn Contact Exporter</title>
-    <style>
-        body { width: 300px; padding: 10px; font-family: Arial, sans-serif; }
-        button { width: 100%; margin: 10px 0; }
-        #status { color: green; }
-        #error { color: red; }
-    </style>
+  <title>LinkedIn to HubSpot Exporter</title>
+  <style>
+    body {
+      width: 300px;
+      font-family: Arial, sans-serif;
+    }
+    #status {
+      margin-top: 10px;
+      color: green;
+    }
+    #error {
+      margin-top: 10px;
+      color: red;
+    }
+  </style>
 </head>
 <body>
-    <h2>LinkedIn Contact Exporter</h2>
-    <main>
-        <button id="exportContacts" aria-label="Export LinkedIn Contacts to HubSpot">Export Contacts</button>
-        <button id="configureHubSpot" aria-label="Configure HubSpot Integration">Configure HubSpot</button>
-        <div id="status"></div>
-        <div id="error"></div>
-    </main>
-    <script src="popup.js"></script>
+  <h2>LinkedIn to HubSpot Exporter</h2>
+  <button id="exportContacts">Export Contacts</button>
+  <button id="configureHubSpot">Configure HubSpot API Key</button>
+  <div id="status"></div>
+  <div id="error"></div>
+  <script src="popup.js"></script>
 </body>
 </html>
