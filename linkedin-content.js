@@ -15,43 +15,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function extractLinkedInContacts() {
     const contacts = [];
 
-    // Assuming the LinkedIn page has multiple profiles that we want to extract
-    const contactCards = document.querySelectorAll('div._current-role-item_th0xau, div.entity-result__content');
+    // Using the specific selectors you provided
+    const nameElement = document.querySelector('#profile-card-section > section._header_sqh8tm > div:nth-child(1) > div.rJkHgUAlibrlvxSdOPqapjdnLcxtvFCpmzOw > h1');
+    const jobTitleElement = document.querySelector('#profile-card-section > section.RFyhPFugbUnuvokFTmGITzmcvFwPINVwGYEc.wide._inset-padding_sqh8tm > div > div > div.jELqyFWuKDOfbqoXLNVeDZOgmJfLFTStbkM._lockup-content-overflow-hidden_p4eb22 > p._current-role-item_th0xau._headingText_e3b563._default_1i6ulk._sizeSmall_e3b563 > span');
+    const companyElement = document.querySelector('#profile-card-section > section.RFyhPFugbUnuvokFTmGITzmcvFwPINVwGYEc.wide._inset-padding_sqh8tm > section > div > address > ul > li > a > span._secondary-link_hqxetg');
 
-    console.log('Number of contact cards found:', contactCards.length);
+    if (nameElement) {
+        const fullName = nameElement.textContent.trim().split(' ');
 
-    contactCards.forEach(card => {
-        // Extracting the name from the <h1> tag
-        const nameElement = card.querySelector('h1[data-anonymize="person-name"]');
-        const profileLinkElement = card.querySelector('a[href*="/in/"]'); // Profile link
-        const headlineElement = card.querySelector('span[data-anonymize="headline"]');
-        const jobTitleElement = card.querySelector('span[data-anonymize="job-title"]');
-        const companyElement = card.querySelector('a[data-anonymize="company-name"]');
-        const companyLogoElement = card.querySelector('img[data-anonymize="company-logo"]');
+        const contact = {
+            firstName: fullName[0] || '',
+            lastName: fullName.slice(1).join(' ') || '',
+            profileUrl: '', // Since no profile URL was provided in the selectors
+            headline: jobTitleElement ? jobTitleElement.textContent.trim() : '',
+            jobTitle: jobTitleElement ? jobTitleElement.textContent.trim() : '',
+            company: companyElement ? companyElement.textContent.trim() : '',
+            companyUrl: '', // Assuming no direct link URL provided from the selectors
+            email: '' // LinkedIn does not typically show email addresses directly
+        };
 
-        // Verifying all elements to ensure we can extract them without null errors
-        if (nameElement) {
-            const fullName = nameElement.textContent.trim().split(' ');
-
-            const contact = {
-                firstName: fullName[0],
-                lastName: fullName.slice(1).join(' '),
-                profileUrl: profileLinkElement ? profileLinkElement.href : '',
-                headline: headlineElement ? headlineElement.textContent.trim() : '',
-                jobTitle: jobTitleElement ? jobTitleElement.textContent.trim() : '',
-                company: companyElement ? companyElement.textContent.trim() : '',
-                companyUrl: companyElement ? companyElement.href : '',
-                companyLogoUrl: companyLogoElement ? companyLogoElement.src : '',
-                email: '' // LinkedIn does not typically show email addresses directly
-            };
-
-            // Logging the extracted contact to verify the output
-            console.log('Extracted contact:', contact);
-            contacts.push(contact);
-        } else {
-            console.warn('Could not extract contact details from card:', card);
-        }
-    });
+        // Logging the extracted contact to verify the output
+        console.log('Extracted contact:', contact);
+        contacts.push(contact);
+    } else {
+        console.warn('Could not extract contact details.');
+    }
 
     return contacts;
 }
