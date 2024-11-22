@@ -1,54 +1,47 @@
 const express = require('express');
-const axios = require('axios');
 const cors = require('cors');
-
+const axios = require('axios');
 const app = express();
 
-// Allow all origins to access the proxy server
-app.use(cors()); // Allow cross-origin requests from your extension
+// Enable CORS for all incoming requests (to allow requests from the Chrome extension)
+app.use(cors());
 
-app.use(express.json()); // For parsing application/json
+// Parse incoming JSON requests
+app.use(express.json());
 
-// Replace this with your actual HubSpot API Key
-const HUBSPOT_API_KEY = 'pat-eu1-6c7f31d6-1485-4852-a40b-a7ff0cd87b03';
-
+// POST route to receive contacts and send them to HubSpot
 app.post('/hubspot-contact', async (req, res) => {
-    const { contacts } = req.body;
+  try {
+    const { contacts, apiKey } = req.body;
 
-    try {
-        const responses = await Promise.all(
-            contacts.map((contact) => {
-                return axios.post(
-                    'https://api.hubapi.com/contacts/v1/contact/',
-                    {
-                        properties: [
-                            { property: 'firstname', value: contact.fullName.split(' ')[0] },
-                            { property: 'lastname', value: contact.fullName.split(' ').slice(1).join(' ') },
-                            { property: 'jobtitle', value: contact.headline },
-                            { property: 'company', value: contact.company },
-                            { property: 'email', value: contact.email }
-                        ]
-                    },
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-            })
-        );
+    // Prepare the data for HubSpot API
+    const hubSpotData = {
+      properties: contacts.map(contact => ({
+        property: 'firstname',
+        value: contact.firstname
+      }))
+    };
 
-        // Set the CORS header for the response to your extension's origin
-        res.header('Access-Control-Allow-Origin', '*'); // Allow CORS from any origin
-        res.status(200).json({ success: true, responses });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: error.message });
-    }
+    // Make a request to HubSpot API
+    const response = await axios.post('https://api.hubapi.com/contacts/v1/contact/', hubSpotData, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // If successful, respond with success message
+    res.json({ success: true, message: 'Contacts added successfully.' });
+
+  } catch (error) {
+    console.error('Error while sending data to HubSpot:', error);
+
+    // If there's an error, send the error message as response
+    res.json({ success: false, message: error.message });
+  }
 });
 
-const PORT = 5001; // You can change this to 5000 if you'd prefer
-app.listen(PORT, () => {
-    console.log(`Proxy server is running at http://localhost:${PORT}`);
+// Start the server and listen on port 5001
+app.listen(5001, () => {
+  console.log('Proxy server running on port 5001');
 });
