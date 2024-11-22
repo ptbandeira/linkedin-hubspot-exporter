@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Send the contacts and API Key to the proxy server (localhost:5001)
         const response = await exportToHubSpotViaProxy(contacts, apiKey);
         
+        // Handle the response from the proxy server
         if (response.success) {
           statusElement.textContent = `Exported ${contacts.length} contact(s) to HubSpot successfully!`;
         } else {
@@ -89,12 +90,13 @@ async function getHubSpotApiKey() {
 // Function to send contacts to the proxy server
 async function exportToHubSpotViaProxy(contacts, apiKey) {
   try {
+    console.log('Sending contacts to proxy server...');
     const response = await fetch('http://localhost:5001/hubspot-contact', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ contacts }),
+      body: JSON.stringify({ contacts, apiKey }), // Pass API key as part of the body
     });
 
     if (!response.ok) {
@@ -105,6 +107,7 @@ async function exportToHubSpotViaProxy(contacts, apiKey) {
     return data;  // Return the server's response
 
   } catch (error) {
+    console.error('Error during export:', error);  // Log detailed error for debugging
     return { success: false, message: error.message };
   }
 }
