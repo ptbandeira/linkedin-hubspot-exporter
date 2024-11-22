@@ -1,15 +1,18 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "LinkedIn to HubSpot Contact Exporter",
   "version": "1.0",
   "description": "Export LinkedIn contacts directly to HubSpot",
   "permissions": [
     "activeTab",
-    "https://www.linkedin.com/*",
-    "https://app.hubspot.com/*",
+    "scripting",
     "storage"
   ],
-  "browser_action": {
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://app.hubspot.com/*"
+  ],
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/icon16.png",
@@ -18,8 +21,7 @@
     }
   },
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -33,3 +35,4 @@
     "128": "images/icon128.png"
   }
 }
+
