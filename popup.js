@@ -17,8 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Handle the extracted contacts
       if (contacts && contacts.length > 0) {
         statusElement.textContent = `Found ${contacts.length} contact(s). Exporting to HubSpot...`;
-        await exportToHubSpot(contacts);
-        statusElement.textContent = `Exported ${contacts.length} contact(s) to HubSpot successfully!`;
+
+        // Retrieve the HubSpot API Key from storage
+        const apiKey = await getHubSpotApiKey();
+        // Send the contacts and API Key to background.js
+        chrome.runtime.sendMessage({
+          action: 'exportToHubSpot',
+          contacts: contacts,
+          apiKey: apiKey
+        }, (response) => {
+          if (response.status === 'success') {
+            statusElement.textContent = `Exported ${contacts.length} contact(s) to HubSpot successfully!`;
+          } else {
+            statusElement.textContent = `Export failed: ${response.message}`;
+          }
+        });
       } else {
         statusElement.textContent = 'No contacts found to export. Make sure you are on the correct LinkedIn page.';
       }
@@ -61,29 +74,6 @@ async function getCurrentTab() {
       resolve(tabs);
     });
   });
-}
-
-// Function to export contacts to HubSpot
-async function exportToHubSpot(contacts) {
-  const apiKey = await getHubSpotApiKey();
-
-  for (const contact of contacts) {
-    await fetch('https://api.hubapi.com/contacts/v1/contact/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        properties: [
-          { property: 'firstname', value: contact.fullName.split(' ')[0] || '' },
-          { property: 'lastname', value: contact.fullName.split(' ').slice(1).join(' ') || '' },
-          { property: 'jobtitle', value: contact.jobTitle || '' },
-          { property: 'company', value: contact.company || '' }
-        ]
-      })
-    });
-  }
 }
 
 // Function to get the HubSpot API key from storage
