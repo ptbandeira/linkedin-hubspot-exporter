@@ -10,7 +10,7 @@ app.use(cors()); // Allow cross-origin requests from your extension
 app.use(express.json()); // For parsing application/json
 
 // Replace this with your actual HubSpot API Key
-const HUBSPOT_API_KEY = pat-eu1-6c7f31d6-1485-4852-a40b-a7ff0cd87b03;
+const HUBSPOT_API_KEY = 'pat-eu1-6c7f31d6-1485-4852-a40b-a7ff0cd87b03';
 
 app.post('/hubspot-contact', async (req, res) => {
     const { contacts } = req.body;
