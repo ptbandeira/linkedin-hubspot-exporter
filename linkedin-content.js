@@ -2,24 +2,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractContacts') {
         try {
             const contacts = extractLinkedInContacts();
+            console.log('Extracted Contacts:', contacts); // Log extracted contacts
             sendResponse(contacts);
         } catch (error) {
-            console.error("Failed to extract contacts:", error);
-            sendResponse([]); // Return empty array on error
+            console.error("Error extracting contacts:", error);
+            sendResponse([]); // Send an empty array in case of error
         }
     }
-    // Let Chrome know we will send the response asynchronously
-    return true; 
+    return true; // Indicate asynchronous response
 });
 
 function extractLinkedInContacts() {
     const contacts = [];
+    
+    // Attempting to select all contact cards on LinkedIn
     const contactCards = document.querySelectorAll('.search-result__info');
-
-    if (!contactCards || contactCards.length === 0) {
-        console.warn("No contacts found on the current LinkedIn page.");
-        return contacts; // Return empty array if no contacts are found
-    }
+    
+    console.log('Number of contact cards found:', contactCards.length);
 
     contactCards.forEach(card => {
         const nameElement = card.querySelector('.actor-name');
@@ -36,8 +35,10 @@ function extractLinkedInContacts() {
                 title: titleElement ? titleElement.textContent.trim() : '',
                 email: '' // LinkedIn doesn't typically show emails directly
             });
+
+            console.log('Extracted contact:', contacts[contacts.length - 1]); // Log each extracted contact
         } else {
-            console.warn("Unable to find name or profile link for a contact.");
+            console.warn('Could not extract contact details from card:', card);
         }
     });
 
