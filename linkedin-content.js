@@ -4,35 +4,31 @@ console.log("LinkedIn content script loaded");
 function extractContactInfo() {
     const contacts = [];
 
-    // Find the main profile section
-    const profileSection = document.querySelector('.pv-top-card');
+    // Full Name
+    const fullNameElement = document.querySelector('h1[data-anonymize="person-name"]');
+    const fullName = fullNameElement ? fullNameElement.innerText.trim() : '';
 
-    if (profileSection) {
-        // Extract the full name
-        const fullNameElement = profileSection.querySelector('h1[data-anonymize="person-name"]');
-        const fullName = fullNameElement ? fullNameElement.innerText.trim() : '';
+    // Job Title (Headline)
+    const headlineElement = document.querySelector('span[data-anonymize="job-title"]');
+    const headline = headlineElement ? headlineElement.innerText.trim() : '';
 
-        // Extract the headline (profession or role)
-        const headlineElement = profileSection.querySelector('span[data-anonymize="headline"]');
-        const headline = headlineElement ? headlineElement.innerText.trim() : '';
+    // Email Address (sometimes it's present)
+    const emailElement = document.querySelector('span[data-anonymize="email"]');
+    const email = emailElement ? emailElement.innerText.trim() : '';
 
-        // Extract the current position and company
-        const positionElement = profileSection.querySelector('span[data-anonymize="job-title"]');
-        const companyElement = profileSection.querySelector('a[data-anonymize="company-name"]');
-        const jobTitle = positionElement ? positionElement.innerText.trim() : '';
-        const company = companyElement ? companyElement.innerText.trim() : '';
+    // Company Logo (or company name, or URL)
+    const companyElement = document.querySelector('img[data-anonymize="company-logo"]');
+    const company = companyElement ? companyElement.alt.trim() : ''; // Using alt attribute as company name
 
-        // Construct the contact object
-        const contact = {
-            fullName,
-            headline,
-            jobTitle,
-            company
-        };
+    // Construct the contact object
+    const contact = {
+        fullName,
+        headline,
+        email,
+        company
+    };
 
-        contacts.push(contact);
-    }
-
+    contacts.push(contact);
     return contacts;
 }
 
