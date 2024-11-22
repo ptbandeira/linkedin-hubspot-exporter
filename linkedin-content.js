@@ -15,15 +15,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function extractLinkedInContacts() {
     const contacts = [];
     
-    // Attempting to select all contact cards on LinkedIn
-    const contactCards = document.querySelectorAll('.search-result__info');
+    // Select all contact cards (Update the selector as needed based on LinkedIn's structure)
+    const contactCards = document.querySelectorAll('.entity-result__content');
     
     console.log('Number of contact cards found:', contactCards.length);
 
     contactCards.forEach(card => {
-        const nameElement = card.querySelector('.actor-name');
-        const profileLink = card.querySelector('a.search-result__result-link');
-        const titleElement = card.querySelector('.subline-level-1');
+        const nameElement = card.querySelector('.entity-result__title-text');
+        const profileLink = card.querySelector('a[href*="/in/"]');
+        const titleElement = card.querySelector('.entity-result__primary-subtitle');
 
         if (nameElement && profileLink) {
             const fullName = nameElement.textContent.trim().split(' ');
@@ -36,7 +36,7 @@ function extractLinkedInContacts() {
                 email: '' // LinkedIn doesn't typically show emails directly
             });
 
-            console.log('Extracted contact:', contacts[contacts.length - 1]); // Log each extracted contact
+            console.log('Extracted contact:', contacts[contacts.length - 1]);
         } else {
             console.warn('Could not extract contact details from card:', card);
         }
