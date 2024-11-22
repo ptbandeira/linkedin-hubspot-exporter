@@ -1,21 +1,28 @@
+// This code is the entire linkedin-content.js file
+
+// Log message to confirm the content script is loaded
+console.log("LinkedIn content script loaded");
+
+// Listen for messages from the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractContacts') {
         try {
             const contacts = extractLinkedInContacts();
-            console.log('Extracted Contacts:', contacts); // Log extracted contacts
+            console.log('Extracted Contacts:', contacts); // Log the contacts we found
             sendResponse(contacts);
         } catch (error) {
             console.error("Error extracting contacts:", error);
-            sendResponse([]); // Send an empty array in case of error
+            sendResponse([]); // Send an empty array if there's an error
         }
     }
-    return true; // Indicate asynchronous response
+    return true; // Indicates asynchronous response
 });
 
+// Function to extract contacts from LinkedIn
 function extractLinkedInContacts() {
     const contacts = [];
 
-    // Generic selector to find name, job title, etc.
+    // Find the contact card elements
     const contactCards = document.querySelectorAll('div');
 
     console.log('Number of div elements found:', contactCards.length);
@@ -30,12 +37,12 @@ function extractLinkedInContacts() {
             const contact = {
                 firstName: fullName[0] || '',
                 lastName: fullName.slice(1).join(' ') || '',
-                profileUrl: '', // Profile URL can be added if found
-                headline: '', // No headline for now, simplifying
-                jobTitle: '', // No job title for now, simplifying
-                company: '', // No company name for now, simplifying
-                companyUrl: '', // No company URL for now, simplifying
-                email: '' // No email, as it's not usually shown directly
+                profileUrl: '', // Optional - Add profile URL logic if needed
+                headline: '', // Simplified - no headline extraction for now
+                jobTitle: '', // Simplified - no job title extraction for now
+                company: '', // Simplified - no company extraction for now
+                companyUrl: '', // Optional - Add company URL logic if needed
+                email: '' // LinkedIn does not show email addresses directly
             };
 
             console.log('Extracted contact:', contact);
