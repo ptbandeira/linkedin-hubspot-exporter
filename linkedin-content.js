@@ -1,54 +1,40 @@
 // linkedin-content.js
 
-// Log to confirm the content script is loaded
-console.log("LinkedIn content script loaded");
+// Function to extract contact information from LinkedIn profiles
+function extractContactInfo() {
+  const contacts = [];
+
+  // Extract the full name
+  const fullNameElement = document.querySelector('h1[data-anonymize="person-name"]');
+  const fullName = fullNameElement ? fullNameElement.innerText.trim() : '';
+
+  // Extract the headline
+  const headlineElement = document.querySelector('span[data-anonymize="headline"]');
+  const headline = headlineElement ? headlineElement.innerText.trim() : '';
+
+  // Extract the current position and company
+  const positionElement = document.querySelector('span[data-anonymize="job-title"]');
+  const companyElement = document.querySelector('a[data-anonymize="company-name"]');
+  const jobTitle = positionElement ? positionElement.innerText.trim() : '';
+  const company = companyElement ? companyElement.innerText.trim() : '';
+
+  // Construct the contact object
+  const contact = {
+    fullName,
+    headline,
+    jobTitle,
+    company
+  };
+
+  contacts.push(contact);
+
+  return contacts;
+}
 
 // Listen for messages from the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractContacts') {
-    try {
-      const contacts = extractLinkedInContacts();
-      console.log('Extracted Contacts:', contacts);
-      sendResponse({ contacts });
-    } catch (error) {
-      console.error("Error extracting contacts:", error);
-      sendResponse({ contacts: [] });
-    }
+    const contacts = extractContactInfo();
+    sendResponse({ contacts });
   }
-  return true; // Indicates asynchronous response
 });
-
-// Function to extract contacts from LinkedIn
-function extractLinkedInContacts() {
-  const contacts = [];
-
-  // Select all profile cards on the page
-  const profileCards = document.querySelectorAll('.entity-result__item');
-
-  profileCards.forEach(card => {
-    const nameElement = card.querySelector('.entity-result__title-text a span span');
-    const occupationElement = card.querySelector('.entity-result__primary-subtitle');
-    const locationElement = card.querySelector('.entity-result__secondary-subtitle');
-
-    if (nameElement && occupationElement && locationElement) {
-      const fullName = nameElement.textContent.trim().split(' ');
-      const firstName = fullName[0] || '';
-      const lastName = fullName.slice(1).join(' ') || '';
-      const occupation = occupationElement.textContent.trim();
-      const location = locationElement.textContent.trim();
-      const profileUrl = card.querySelector('.entity-result__title-text a').href;
-
-      const contact = {
-        firstName,
-        lastName,
-        occupation,
-        location,
-        profileUrl
-      };
-
-      contacts.push(contact);
-    }
-  });
-
-  return contacts;
-}
