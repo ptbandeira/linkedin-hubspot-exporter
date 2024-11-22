@@ -20,18 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Retrieve the HubSpot API Key from storage
         const apiKey = await getHubSpotApiKey();
-        // Send the contacts and API Key to background.js
-        chrome.runtime.sendMessage({
-          action: 'exportToHubSpot',
-          contacts: contacts,
-          apiKey: apiKey
-        }, (response) => {
-          if (response.status === 'success') {
-            statusElement.textContent = `Exported ${contacts.length} contact(s) to HubSpot successfully!`;
-          } else {
-            statusElement.textContent = `Export failed: ${response.message}`;
-          }
-        });
+
+        // Send the contacts and API Key to the proxy server (localhost:5001)
+        const response = await exportToHubSpotViaProxy(contacts, apiKey);
+        
+        if (response.success) {
+          statusElement.textContent = `Exported ${contacts.length} contact(s) to HubSpot successfully!`;
+        } else {
+          statusElement.textContent = `Export failed: ${response.message}`;
+        }
       } else {
         statusElement.textContent = 'No contacts found to export. Make sure you are on the correct LinkedIn page.';
       }
@@ -87,4 +84,27 @@ async function getHubSpotApiKey() {
       }
     });
   });
+}
+
+// Function to send contacts to the proxy server
+async function exportToHubSpotViaProxy(contacts, apiKey) {
+  try {
+    const response = await fetch('http://localhost:5001/hubspot-contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ contacts }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send data to the proxy server.');
+    }
+
+    const data = await response.json();
+    return data;  // Return the server's response
+
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 }
