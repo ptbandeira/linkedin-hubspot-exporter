@@ -14,29 +14,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 function extractLinkedInContacts() {
     const contacts = [];
-    
-    // Select all contact cards (Update the selector as needed based on LinkedIn's structure)
-    const contactCards = document.querySelectorAll('.entity-result__content');
-    
+
+    // Assuming the LinkedIn page has multiple profiles that we want to extract
+    const contactCards = document.querySelectorAll('div._current-role-item_th0xau, div.entity-result__content');
+
     console.log('Number of contact cards found:', contactCards.length);
 
     contactCards.forEach(card => {
-        const nameElement = card.querySelector('.entity-result__title-text');
-        const profileLink = card.querySelector('a[href*="/in/"]');
-        const titleElement = card.querySelector('.entity-result__primary-subtitle');
+        // Extracting the name from the <h1> tag
+        const nameElement = card.querySelector('h1[data-anonymize="person-name"]');
+        const profileLinkElement = card.querySelector('a[href*="/in/"]'); // Profile link
+        const headlineElement = card.querySelector('span[data-anonymize="headline"]');
+        const jobTitleElement = card.querySelector('span[data-anonymize="job-title"]');
+        const companyElement = card.querySelector('a[data-anonymize="company-name"]');
+        const companyLogoElement = card.querySelector('img[data-anonymize="company-logo"]');
 
-        if (nameElement && profileLink) {
+        // Verifying all elements to ensure we can extract them without null errors
+        if (nameElement) {
             const fullName = nameElement.textContent.trim().split(' ');
 
-            contacts.push({
+            const contact = {
                 firstName: fullName[0],
                 lastName: fullName.slice(1).join(' '),
-                profileUrl: profileLink.href,
-                title: titleElement ? titleElement.textContent.trim() : '',
-                email: '' // LinkedIn doesn't typically show emails directly
-            });
+                profileUrl: profileLinkElement ? profileLinkElement.href : '',
+                headline: headlineElement ? headlineElement.textContent.trim() : '',
+                jobTitle: jobTitleElement ? jobTitleElement.textContent.trim() : '',
+                company: companyElement ? companyElement.textContent.trim() : '',
+                companyUrl: companyElement ? companyElement.href : '',
+                companyLogoUrl: companyLogoElement ? companyLogoElement.src : '',
+                email: '' // LinkedIn does not typically show email addresses directly
+            };
 
-            console.log('Extracted contact:', contacts[contacts.length - 1]);
+            // Logging the extracted contact to verify the output
+            console.log('Extracted contact:', contact);
+            contacts.push(contact);
         } else {
             console.warn('Could not extract contact details from card:', card);
         }
