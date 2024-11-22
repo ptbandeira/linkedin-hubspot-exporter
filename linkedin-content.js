@@ -1,54 +1,54 @@
-// This code is the entire linkedin-content.js file
+// linkedin-content.js
 
-// Log message to confirm the content script is loaded
+// Log to confirm the content script is loaded
 console.log("LinkedIn content script loaded");
 
 // Listen for messages from the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'extractContacts') {
-        try {
-            const contacts = extractLinkedInContacts();
-            console.log('Extracted Contacts:', contacts); // Log the contacts we found
-            sendResponse(contacts);
-        } catch (error) {
-            console.error("Error extracting contacts:", error);
-            sendResponse([]); // Send an empty array if there's an error
-        }
+  if (request.action === 'extractContacts') {
+    try {
+      const contacts = extractLinkedInContacts();
+      console.log('Extracted Contacts:', contacts);
+      sendResponse({ contacts });
+    } catch (error) {
+      console.error("Error extracting contacts:", error);
+      sendResponse({ contacts: [] });
     }
-    return true; // Indicates asynchronous response
+  }
+  return true; // Indicates asynchronous response
 });
 
 // Function to extract contacts from LinkedIn
 function extractLinkedInContacts() {
-    const contacts = [];
+  const contacts = [];
 
-    // Find the contact card elements
-    const contactCards = document.querySelectorAll('div');
+  // Select all profile cards on the page
+  const profileCards = document.querySelectorAll('.entity-result__item');
 
-    console.log('Number of div elements found:', contactCards.length);
+  profileCards.forEach(card => {
+    const nameElement = card.querySelector('.entity-result__title-text a span span');
+    const occupationElement = card.querySelector('.entity-result__primary-subtitle');
+    const locationElement = card.querySelector('.entity-result__secondary-subtitle');
 
-    contactCards.forEach(card => {
-        const nameElement = card.querySelector('h1') ||
-                            card.querySelector('span[data-anonymize="person-name"]');
+    if (nameElement && occupationElement && locationElement) {
+      const fullName = nameElement.textContent.trim().split(' ');
+      const firstName = fullName[0] || '';
+      const lastName = fullName.slice(1).join(' ') || '';
+      const occupation = occupationElement.textContent.trim();
+      const location = locationElement.textContent.trim();
+      const profileUrl = card.querySelector('.entity-result__title-text a').href;
 
-        if (nameElement) {
-            const fullName = nameElement.textContent.trim().split(' ');
+      const contact = {
+        firstName,
+        lastName,
+        occupation,
+        location,
+        profileUrl
+      };
 
-            const contact = {
-                firstName: fullName[0] || '',
-                lastName: fullName.slice(1).join(' ') || '',
-                profileUrl: '', // Optional - Add profile URL logic if needed
-                headline: '', // Simplified - no headline extraction for now
-                jobTitle: '', // Simplified - no job title extraction for now
-                company: '', // Simplified - no company extraction for now
-                companyUrl: '', // Optional - Add company URL logic if needed
-                email: '' // LinkedIn does not show email addresses directly
-            };
+      contacts.push(contact);
+    }
+  });
 
-            console.log('Extracted contact:', contact);
-            contacts.push(contact);
-        }
-    });
-
-    return contacts;
+  return contacts;
 }
