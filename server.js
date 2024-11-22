@@ -39,6 +39,8 @@ app.post('/hubspot-contact', async (req, res) => {
             })
         );
 
+        // Set the CORS header for the response to your extension's origin
+        res.header('Access-Control-Allow-Origin', '*'); // Allow CORS from any origin
         res.status(200).json({ success: true, responses });
     } catch (error) {
         console.error(error);
